@@ -1,10 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import './config/database';
-import apiRoutes from './routes/api';
 
 dotenv.config();
+
+import { initializeDatabase } from './config/database';
+import apiRoutes from './routes/api';
 
 const getApiBaseUrl = (codespaceName = process.env.CODESPACE_NAME) => {
   if (codespaceName) {
@@ -36,7 +37,16 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api', apiRoutes);
 
-app.listen(port, '0.0.0.0', () => {
-  console.log(`OctoFit backend listening on port ${port}`);
-  console.log(`API base URL: ${baseUrl}`);
+const startServer = async () => {
+  await initializeDatabase();
+
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`OctoFit backend listening on port ${port}`);
+    console.log(`API base URL: ${baseUrl}`);
+  });
+};
+
+startServer().catch((error) => {
+  console.error('Unable to start OctoFit backend:', error);
+  process.exit(1);
 });
