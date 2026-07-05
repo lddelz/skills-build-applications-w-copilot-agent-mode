@@ -4,6 +4,104 @@ import { Activity, LeaderboardEntry, Team, User, Workout } from '../models';
 const connectionString = process.env.MONGODB_URI || 'mongodb://localhost:27017/octofit_db';
 const db = mongoose.connection;
 
+export const fallbackData = {
+  users: [
+    {
+      _id: 'fallback-user-1',
+      name: 'Ava Chen',
+      email: 'ava.chen@octofit.app',
+      role: 'Admin',
+      fitnessLevel: 'Advanced',
+    },
+    {
+      _id: 'fallback-user-2',
+      name: 'Liam Ortiz',
+      email: 'liam.ortiz@octofit.app',
+      role: 'Athlete',
+      fitnessLevel: 'Intermediate',
+    },
+    {
+      _id: 'fallback-user-3',
+      name: 'Mina Patel',
+      email: 'mina.patel@octofit.app',
+      role: 'Coach',
+      fitnessLevel: 'Advanced',
+    },
+  ],
+  teams: [
+    {
+      _id: 'fallback-team-1',
+      name: 'Velocity',
+      sport: 'Cycling',
+      members: ['fallback-user-1', 'fallback-user-2'],
+      captain: 'fallback-user-1',
+    },
+    {
+      _id: 'fallback-team-2',
+      name: 'Summit',
+      sport: 'Running',
+      members: ['fallback-user-3'],
+      captain: 'fallback-user-3',
+    },
+  ],
+  activities: [
+    {
+      _id: 'fallback-activity-1',
+      type: 'Run',
+      duration: 35,
+      date: '2026-07-05T00:00:00.000Z',
+      calories: 420,
+      user: 'fallback-user-1',
+    },
+    {
+      _id: 'fallback-activity-2',
+      type: 'Cycling',
+      duration: 45,
+      date: '2026-07-04T00:00:00.000Z',
+      calories: 500,
+      user: 'fallback-user-2',
+    },
+    {
+      _id: 'fallback-activity-3',
+      type: 'Strength',
+      duration: 30,
+      date: '2026-07-03T00:00:00.000Z',
+      calories: 280,
+      user: 'fallback-user-3',
+    },
+  ],
+  leaderboard: [
+    { _id: 'fallback-leaderboard-1', user: 'fallback-user-1', points: 1320, rank: 1 },
+    { _id: 'fallback-leaderboard-2', user: 'fallback-user-2', points: 1180, rank: 2 },
+    { _id: 'fallback-leaderboard-3', user: 'fallback-user-3', points: 1040, rank: 3 },
+  ],
+  workouts: [
+    {
+      _id: 'fallback-workout-1',
+      name: 'HIIT Cardio',
+      difficulty: 'Intermediate',
+      duration: 25,
+      focus: 'Endurance',
+    },
+    {
+      _id: 'fallback-workout-2',
+      name: 'Core Strength',
+      difficulty: 'Beginner',
+      duration: 20,
+      focus: 'Mobility',
+    },
+    {
+      _id: 'fallback-workout-3',
+      name: 'Tempo Run',
+      difficulty: 'Advanced',
+      duration: 40,
+      focus: 'Speed',
+    },
+  ],
+};
+
+let isInitialized = false;
+
 const seedDefaultData = async () => {
   try {
     const counts = await Promise.all([
@@ -115,21 +213,30 @@ const seedDefaultData = async () => {
 
 export const connectToDatabase = async () => {
   if (db.readyState === 1) {
-    return;
+    return true;
   }
 
   try {
     await mongoose.connect(connectionString, { serverSelectionTimeoutMS: 5000 });
     console.log('Connected to octofit_db');
+    return true;
   } catch (error) {
-    console.error('Error connecting to octofit_db:', error);
-    throw error;
+    console.warn('Database unavailable, using fallback API data:', error);
+    return false;
   }
 };
 
 export const initializeDatabase = async () => {
-  await connectToDatabase();
-  await seedDefaultData();
+  if (isInitialized) {
+    return;
+  }
+
+  const connected = await connectToDatabase();
+  if (connected) {
+    await seedDefaultData();
+  }
+
+  isInitialized = true;
 };
 
 db.on('error', console.error.bind(console, 'connection error:'));

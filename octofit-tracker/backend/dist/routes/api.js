@@ -7,9 +7,24 @@ const router = (0, express_1.Router)();
 const sendFallbackResponse = (res, payload = []) => {
     res.json(payload);
 };
+const getFallbackPayload = (resource) => {
+    switch (resource) {
+        case 'teams':
+            return database_1.fallbackData.teams;
+        case 'activities':
+            return database_1.fallbackData.activities;
+        case 'leaderboard':
+            return database_1.fallbackData.leaderboard;
+        case 'workouts':
+            return database_1.fallbackData.workouts;
+        case 'users':
+        default:
+            return database_1.fallbackData.users;
+    }
+};
 router.get(['/users', '/users/'], async (_req, res) => {
     if (!(0, database_1.isDatabaseConnected)()) {
-        sendFallbackResponse(res, []);
+        sendFallbackResponse(res, getFallbackPayload('users'));
         return;
     }
     try {
@@ -37,7 +52,7 @@ router.post(['/users', '/users/'], async (req, res) => {
 });
 router.get(['/teams', '/teams/'], async (_req, res) => {
     if (!(0, database_1.isDatabaseConnected)()) {
-        sendFallbackResponse(res, []);
+        sendFallbackResponse(res, getFallbackPayload('teams'));
         return;
     }
     try {
@@ -65,7 +80,7 @@ router.post(['/teams', '/teams/'], async (req, res) => {
 });
 router.get(['/activities', '/activities/'], async (_req, res) => {
     if (!(0, database_1.isDatabaseConnected)()) {
-        sendFallbackResponse(res, []);
+        sendFallbackResponse(res, getFallbackPayload('activities'));
         return;
     }
     try {
@@ -93,7 +108,7 @@ router.post(['/activities', '/activities/'], async (req, res) => {
 });
 router.get(['/leaderboard', '/leaderboard/'], async (_req, res) => {
     if (!(0, database_1.isDatabaseConnected)()) {
-        sendFallbackResponse(res, []);
+        sendFallbackResponse(res, getFallbackPayload('leaderboard'));
         return;
     }
     try {
@@ -121,7 +136,7 @@ router.post(['/leaderboard', '/leaderboard/'], async (req, res) => {
 });
 router.get(['/workouts', '/workouts/'], async (_req, res) => {
     if (!(0, database_1.isDatabaseConnected)()) {
-        sendFallbackResponse(res, []);
+        sendFallbackResponse(res, getFallbackPayload('workouts'));
         return;
     }
     try {

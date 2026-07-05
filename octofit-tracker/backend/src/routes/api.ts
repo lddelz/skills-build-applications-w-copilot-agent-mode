@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { Activity, LeaderboardEntry, Team, User, Workout } from '../models';
-import { isDatabaseConnected } from '../config/database';
+import { fallbackData, isDatabaseConnected } from '../config/database';
 
 const router = Router();
 
@@ -8,9 +8,25 @@ const sendFallbackResponse = (res: any, payload: unknown = []) => {
   res.json(payload);
 };
 
+const getFallbackPayload = (resource: 'users' | 'teams' | 'activities' | 'leaderboard' | 'workouts') => {
+  switch (resource) {
+    case 'teams':
+      return fallbackData.teams;
+    case 'activities':
+      return fallbackData.activities;
+    case 'leaderboard':
+      return fallbackData.leaderboard;
+    case 'workouts':
+      return fallbackData.workouts;
+    case 'users':
+    default:
+      return fallbackData.users;
+  }
+};
+
 router.get(['/users', '/users/'], async (_req, res) => {
   if (!isDatabaseConnected()) {
-    sendFallbackResponse(res, []);
+    sendFallbackResponse(res, getFallbackPayload('users'));
     return;
   }
 
@@ -40,7 +56,7 @@ router.post(['/users', '/users/'], async (req, res) => {
 
 router.get(['/teams', '/teams/'], async (_req, res) => {
   if (!isDatabaseConnected()) {
-    sendFallbackResponse(res, []);
+    sendFallbackResponse(res, getFallbackPayload('teams'));
     return;
   }
 
@@ -70,7 +86,7 @@ router.post(['/teams', '/teams/'], async (req, res) => {
 
 router.get(['/activities', '/activities/'], async (_req, res) => {
   if (!isDatabaseConnected()) {
-    sendFallbackResponse(res, []);
+    sendFallbackResponse(res, getFallbackPayload('activities'));
     return;
   }
 
@@ -100,7 +116,7 @@ router.post(['/activities', '/activities/'], async (req, res) => {
 
 router.get(['/leaderboard', '/leaderboard/'], async (_req, res) => {
   if (!isDatabaseConnected()) {
-    sendFallbackResponse(res, []);
+    sendFallbackResponse(res, getFallbackPayload('leaderboard'));
     return;
   }
 
@@ -130,7 +146,7 @@ router.post(['/leaderboard', '/leaderboard/'], async (req, res) => {
 
 router.get(['/workouts', '/workouts/'], async (_req, res) => {
   if (!isDatabaseConnected()) {
-    sendFallbackResponse(res, []);
+    sendFallbackResponse(res, getFallbackPayload('workouts'));
     return;
   }
 
