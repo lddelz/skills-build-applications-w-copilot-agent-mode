@@ -5,13 +5,16 @@ function Leaderboard() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const apiUrl = import.meta.env.VITE_CODESPACE_NAME?.trim()
+    ? `https://${import.meta.env.VITE_CODESPACE_NAME.trim()}-8000.app.github.dev/api/leaderboard/`
+    : getApiUrl('leaderboard');
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadLeaderboard() {
       try {
-        const response = await fetch(getApiUrl('leaderboard'), { signal: controller.signal });
+        const response = await fetch(apiUrl, { signal: controller.signal });
         if (!response.ok) {
           throw new Error('Unable to load leaderboard');
         }

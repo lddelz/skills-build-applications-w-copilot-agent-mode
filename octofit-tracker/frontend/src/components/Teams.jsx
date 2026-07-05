@@ -5,13 +5,16 @@ function Teams() {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const apiUrl = import.meta.env.VITE_CODESPACE_NAME?.trim()
+    ? `https://${import.meta.env.VITE_CODESPACE_NAME.trim()}-8000.app.github.dev/api/teams/`
+    : getApiUrl('teams');
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadTeams() {
       try {
-        const response = await fetch(getApiUrl('teams'), { signal: controller.signal });
+        const response = await fetch(apiUrl, { signal: controller.signal });
         if (!response.ok) {
           throw new Error('Unable to load teams');
         }

@@ -5,13 +5,16 @@ function Users() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const apiUrl = import.meta.env.VITE_CODESPACE_NAME?.trim()
+    ? `https://${import.meta.env.VITE_CODESPACE_NAME.trim()}-8000.app.github.dev/api/users/`
+    : getApiUrl('users');
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadUsers() {
       try {
-        const response = await fetch(getApiUrl('users'), { signal: controller.signal });
+        const response = await fetch(apiUrl, { signal: controller.signal });
         if (!response.ok) {
           throw new Error('Unable to load users');
         }
