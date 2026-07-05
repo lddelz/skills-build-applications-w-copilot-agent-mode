@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { Activity, LeaderboardEntry, Team, User, Workout } from '../models';
 
 const connectionString = process.env.MONGODB_URI || 'mongodb://localhost:27017/octofit_db';
 
@@ -11,9 +12,103 @@ async function seedDatabase() {
 
     console.log('Connected to octofit_db');
 
-    // TODO: Add seed data for users, teams, activities, leaderboard, and workouts
+    await Promise.all([
+      User.deleteMany({}),
+      Team.deleteMany({}),
+      Activity.deleteMany({}),
+      LeaderboardEntry.deleteMany({}),
+      Workout.deleteMany({}),
+    ]);
+
+    const users = await User.insertMany([
+      {
+        name: 'Ava Chen',
+        email: 'ava.chen@octofit.app',
+        role: 'Admin',
+        fitnessLevel: 'Advanced',
+      },
+      {
+        name: 'Liam Ortiz',
+        email: 'liam.ortiz@octofit.app',
+        role: 'Athlete',
+        fitnessLevel: 'Intermediate',
+      },
+      {
+        name: 'Mina Patel',
+        email: 'mina.patel@octofit.app',
+        role: 'Coach',
+        fitnessLevel: 'Advanced',
+      },
+    ]);
+
+    const teams = await Team.insertMany([
+      {
+        name: 'Velocity',
+        sport: 'Cycling',
+        members: [users[0]._id, users[1]._id],
+        captain: users[0]._id,
+      },
+      {
+        name: 'Summit',
+        sport: 'Running',
+        members: [users[2]._id],
+        captain: users[2]._id,
+      },
+    ]);
+
+    await Activity.insertMany([
+      {
+        type: 'Run',
+        duration: 35,
+        date: new Date('2026-07-05'),
+        calories: 420,
+        user: users[0]._id,
+      },
+      {
+        type: 'Cycling',
+        duration: 45,
+        date: new Date('2026-07-04'),
+        calories: 500,
+        user: users[1]._id,
+      },
+      {
+        type: 'Strength',
+        duration: 30,
+        date: new Date('2026-07-03'),
+        calories: 280,
+        user: users[2]._id,
+      },
+    ]);
+
+    await LeaderboardEntry.insertMany([
+      { user: users[0]._id, points: 1320, rank: 1 },
+      { user: users[1]._id, points: 1180, rank: 2 },
+      { user: users[2]._id, points: 1040, rank: 3 },
+    ]);
+
+    await Workout.insertMany([
+      {
+        name: 'HIIT Cardio',
+        difficulty: 'Intermediate',
+        duration: 25,
+        focus: 'Endurance',
+      },
+      {
+        name: 'Core Strength',
+        difficulty: 'Beginner',
+        duration: 20,
+        focus: 'Mobility',
+      },
+      {
+        name: 'Tempo Run',
+        difficulty: 'Advanced',
+        duration: 40,
+        focus: 'Speed',
+      },
+    ]);
 
     console.log('Database seeding complete');
+    console.log(`Seeded ${users.length} users, ${teams.length} teams, activities, leaderboard entries, and workouts.`);
     await mongoose.disconnect();
   } catch (error) {
     console.error('Error seeding database:', error);
